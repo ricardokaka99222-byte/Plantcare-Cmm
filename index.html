@@ -1,1 +1,157 @@
+<!doctype html>
+<html lang="ku" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<title>PlantCare CMMS Free V2</title>
+<style>
+:root{--bg:#0b1220;--panel:#111a2b;--panel2:#172238;--text:#edf3ff;--muted:#91a0b8;--line:#273650;--accent:#39b7ff;--ok:#27c28a;--warn:#f3b94f;--danger:#ff6577}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+button,input,select,textarea{font:inherit}button{cursor:pointer}.app{display:flex;min-height:100vh}.side{width:245px;background:#0e1728;border-left:1px solid var(--line);padding:16px;position:fixed;inset:0 0 0 auto;overflow:auto}.brand{font-size:20px;font-weight:800;margin-bottom:18px}.brand small{display:block;color:var(--muted);font-size:11px;margin-top:4px}.nav button{display:block;width:100%;text-align:right;background:transparent;color:var(--text);border:0;padding:11px;border-radius:10px;margin:3px 0}.nav button:hover,.nav button.active{background:var(--panel2)}.main{margin-right:245px;width:calc(100% - 245px);padding:20px;max-width:1600px}.top{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:18px}.top h1{margin:0;font-size:25px}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:9px 13px;border-radius:9px}.btn.primary{background:var(--accent);color:#06101d;border-color:var(--accent);font-weight:700}.btn.danger{background:#3a1620;border-color:#67303b}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px}.metric{font-size:26px;font-weight:800;margin-top:7px}.muted{color:var(--muted);font-size:13px}.section{margin-top:16px}.section h2{font-size:17px;margin:0 0 10px}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}.table{width:100%;border-collapse:collapse;min-width:750px}.table th,.table td{padding:10px;border-bottom:1px solid var(--line);text-align:right;font-size:13px}.table th{color:#b9c6db;background:#121d31}.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;background:#24324a}.ok{color:#6ce3b4}.warn{color:#ffd37a}.danger{color:#ff8997}.modal{position:fixed;inset:0;background:#0009;display:none;align-items:center;justify-content:center;padding:18px;z-index:20}.modal.open{display:flex}.dialog{width:min(720px,100%);max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.field{display:flex;flex-direction:column;gap:5px}.field.full{grid-column:1/-1}.field label{font-size:12px;color:var(--muted)}.field input,.field select,.field textarea{background:#0b1425;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:9px}.field textarea{min-height:90px;resize:vertical}.modalfoot{display:flex;justify-content:flex-start;gap:8px;margin-top:14px}.toast{position:fixed;left:18px;bottom:18px;background:#18243a;border:1px solid var(--line);padding:11px 14px;border-radius:10px;display:none;z-index:50}.empty{padding:30px;text-align:center;color:var(--muted)}.progress{height:8px;background:#202d43;border-radius:99px;overflow:hidden}.progress i{display:block;height:100%;background:var(--accent)}.login{min-height:100vh;display:grid;place-items:center;padding:20px}.loginbox{width:min(430px,100%);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px}.hidden{display:none!important}
+@media(max-width:900px){.side{width:72px;padding:10px}.brand span,.brand small,.nav button span{display:none}.nav button{text-align:center;font-size:18px}.main{margin-right:72px;width:calc(100% - 72px);padding:12px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.top h1{font-size:20px}}
+@media(max-width:600px){.grid{grid-template-columns:1fr 1fr}.form{grid-template-columns:1fr}.top{align-items:flex-start}.actions{justify-content:flex-end}.card{padding:12px}.metric{font-size:21px}}
+</style>
+</head>
+<body>
+<div id="login" class="login">
+  <div class="loginbox">
+    <div class="brand">🏭 PlantCare CMMS <small>Free V2 • Cement Plant Maintenance</small></div>
+    <p class="muted">Local demo/login layer. For multi-user cloud mode, connect Supabase from Settings.</p>
+    <div class="field"><label>User</label><input id="loginUser" value="manager"></div>
+    <div class="field" style="margin-top:10px"><label>Password</label><input id="loginPass" type="password" value="manager"></div>
+    <button class="btn primary" style="width:100%;margin-top:12px" onclick="login()">Login</button>
+    <p class="muted" style="margin-top:12px">Demo users: manager / planner / supervisor / technician / operator / storekeeper</p>
+  </div>
+</div>
 
+<div id="app" class="app hidden">
+<aside class="side">
+  <div class="brand">🏭 <span>PlantCare</span><small>CMMS Free V2</small></div>
+  <nav class="nav">
+    <button data-page="dashboard" onclick="go('dashboard')">📊 <span>Dashboard</span></button>
+    <button data-page="assets" onclick="go('assets')">🏭 <span>Assets</span></button>
+    <button data-page="inspection" onclick="go('inspection')">📋 <span>Inspection</span></button>
+    <button data-page="workorders" onclick="go('workorders')">🔧 <span>Work Orders</span></button>
+    <button data-page="pm" onclick="go('pm')">📅 <span>PM</span></button>
+    <button data-page="spares" onclick="go('spares')">📦 <span>Spare Parts</span></button>
+    <button data-page="breakdown" onclick="go('breakdown')">🚨 <span>Breakdown</span></button>
+    <button data-page="shutdown" onclick="go('shutdown')">🏗️ <span>Shutdown</span></button>
+    <button data-page="rca" onclick="go('rca')">🔍 <span>RCA</span></button>
+    <button data-page="reports" onclick="go('reports')">📑 <span>Reports</span></button>
+    <button data-page="settings" onclick="go('settings')">⚙️ <span>Settings</span></button>
+  </nav>
+</aside>
+<main class="main">
+  <div class="top"><h1 id="title">Dashboard</h1><div class="actions"><button class="btn" onclick="exportCSV()">Export CSV</button><button class="btn" onclick="logout()">Logout</button></div></div>
+  <div id="content"></div>
+</main>
+</div>
+
+<div id="modal" class="modal"><div class="dialog"><div id="modalBody"></div></div></div>
+<div id="toast" class="toast"></div>
+
+<script>
+const KEY='plantcare_cmms_v2';
+const roles={manager:'Manager',planner:'Planner',supervisor:'Supervisor',technician:'Technician',operator:'Operator',storekeeper:'Storekeeper'};
+let state=JSON.parse(localStorage.getItem(KEY)||'null')||{
+ user:null, lang:'ku', assets:[
+ {id:'A-001',code:'HC-001',name:'Hammer Crusher',area:'Crusher',criticality:'Critical',status:'Running',hours:12450},
+ {id:'A-002',code:'RM-001',name:'Raw Mill',area:'Raw Mill',criticality:'High',status:'Running',hours:18720},
+ {id:'A-003',code:'KM-001',name:'Kiln Main Drive',area:'Kiln',criticality:'Critical',status:'Attention',hours:22340}
+], inspections:[], workorders:[
+ {id:'WO-0001',asset:'HC-001',problem:'Bearing vibration above limit',priority:'HIGH',status:'APPROVED',assigned:'technician',date:'2026-09-22'}
+], pm:[
+ {id:'PM-001',asset:'RM-001',task:'Gearbox oil analysis',freq:'Monthly',due:'2026-09-30',status:'Planned'},
+ {id:'PM-002',asset:'HC-001',task:'Hammer inspection',freq:'Weekly',due:'2026-09-25',status:'Planned'}
+], spares:[
+ {part:'BRG-6312',desc:'Bearing 6312',stock:4,min:2,max:8,location:'WH-A01',cost:35},
+ {part:'OIL-ISO68',desc:'Hydraulic Oil ISO 68',stock:1,min:3,max:10,location:'WH-B02',cost:70}
+], breakdown:[], shutdown:[], rca:[], audit:[]
+};
+function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function toast(s){let t=document.getElementById('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2200)}
+function login(){let u=document.getElementById('loginUser').value.trim()||'manager';state.user={name:u,role:roles[u]?u:'manager'};state.audit.push({at:new Date().toISOString(),user:u,action:'LOGIN'});save();document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');go('dashboard')}
+function logout(){state.user=null;save();location.reload()}
+function go(p){document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===p));let names={dashboard:'Dashboard',assets:'Assets',inspection:'Inspection & Checklist',workorders:'Work Orders',pm:'Preventive Maintenance',spares:'Spare Parts',breakdown:'Breakdown',shutdown:'Shutdown Planning',rca:'Reliability / RCA',reports:'Reports',settings:'Settings'};document.getElementById('title').textContent=names[p]||p;window[p]()}
+function modal(html){document.getElementById('modalBody').innerHTML=html;document.getElementById('modal').classList.add('open')}
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()})
+function dashboard(){
+let open=state.workorders.filter(x=>!['CLOSED','VERIFIED'].includes(x.status)).length, critical=state.assets.filter(x=>x.criticality==='Critical').length, low=state.spares.filter(x=>x.stock<=x.min).length, att=state.assets.filter(x=>x.status!=='Running').length;
+document.getElementById('content').innerHTML=`<div class="grid">
+<div class="card">Total Assets<div class="metric">${state.assets.length}</div></div>
+<div class="card">Attention<div class="metric warn">${att}</div></div>
+<div class="card">Open Work Orders<div class="metric">${open}</div></div>
+<div class="card">Low Stock<div class="metric danger">${low}</div></div>
+</div>
+<div class="grid section">
+<div class="card">Critical Assets<div class="metric">${critical}</div><div class="muted">Criticality registered in asset master</div></div>
+<div class="card">PM Compliance<div class="metric">${state.pm.length?Math.round(state.pm.filter(x=>x.status==='Completed').length/state.pm.length*100):0}%</div></div>
+<div class="card">Breakdowns<div class="metric">${state.breakdown.length}</div></div>
+<div class="card">RCA Cases<div class="metric">${state.rca.length}</div></div>
+</div>
+<div class="section card"><h2>Critical Notifications</h2>${low?'<p class="danger">⚠ Spare parts below minimum stock.</p>':''}${state.workorders.filter(x=>x.priority==='CRITICAL').map(x=>`<p class="danger">🚨 ${x.id} — ${x.problem}</p>`).join('')||'<p class="muted">No critical notifications.</p>'}</div>
+<div class="section card"><h2>Maintenance Workflow</h2><div class="muted">Asset → Inspection → Abnormal → Notification → Work Order → Planning → Spare Parts → Execution → Verification → Close → KPI</div></div>`
+}
+function assets(){
+let rows=state.assets.map(a=>`<tr><td>${a.code}</td><td>${a.name}</td><td>${a.area}</td><td>${a.criticality}</td><td>${a.status}</td><td>${a.hours}</td><td><button class="btn" onclick="editAsset('${a.id}')">Edit</button></td></tr>`).join('');
+document.getElementById('content').innerHTML=`<div class="actions"><button class="btn primary" onclick="addAsset()">+ Add Asset</button></div><div class="section tablewrap"><table class="table"><thead><tr><th>Code</th><th>Asset</th><th>Area</th><th>Criticality</th><th>Status</th><th>Hours</th><th></th></tr></thead><tbody>${rows||'<tr><td colspan=7 class=empty>No assets</td></tr>'}</tbody></table></div>`
+}
+function addAsset(a={}){
+modal(`<h2>${a.id?'Edit':'Add'} Asset</h2><div class="form">
+<div class="field"><label>Code</label><input id="fcode" value="${a.code||''}"></div><div class="field"><label>Name</label><input id="fname" value="${a.name||''}"></div>
+<div class="field"><label>Area</label><input id="farea" value="${a.area||''}"></div><div class="field"><label>Criticality</label><select id="fcrit"><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select></div>
+<div class="field"><label>Status</label><select id="fstatus"><option>Running</option><option>Stopped</option><option>Attention</option></select></div><div class="field"><label>Operating Hours</label><input id="fhours" type="number" value="${a.hours||0}"></div></div>
+<div class="modalfoot"><button class="btn primary" onclick="saveAsset('${a.id||''}')">Save</button><button class="btn" onclick="closeModal()">Cancel</button></div>`)
+}
+function editAsset(id){addAsset(state.assets.find(x=>x.id===id))}
+function saveAsset(id){let a={id:id||'A-'+String(Date.now()).slice(-5),code:fcode.value,name:fname.value,area:farea.value,criticality:fcrit.value,status:fstatus.value,hours:Number(fhours.value||0)};let i=state.assets.findIndex(x=>x.id===a.id);i>=0?state.assets[i]=a:state.assets.push(a);state.audit.push({at:new Date().toISOString(),user:state.user.name,action:'ASSET_SAVE',id:a.id});save();closeModal();toast('Asset saved');assets()}
+function inspection(){
+let rows=state.inspections.map(x=>`<tr><td>${x.date}</td><td>${x.asset}</td><td>${x.component}</td><td>${x.parameter}</td><td>${x.actual} ${x.unit}</td><td class="${x.status==='HIGH'||x.status==='CRITICAL'?'danger':'ok'}">${x.status}</td><td>${x.wo||'-'}</td></tr>`).join('');
+document.getElementById('content').innerHTML=`<div class="actions"><button class="btn primary" onclick="newInspection()">+ New Inspection</button></div><div class="section card"><div class="muted">If Actual Value exceeds limits, status becomes abnormal and a Work Order can be generated automatically.</div></div><div class="section tablewrap"><table class="table"><thead><tr><th>Date</th><th>Asset</th><th>Component</th><th>Parameter</th><th>Actual</th><th>Status</th><th>WO</th></tr></thead><tbody>${rows||'<tr><td colspan=7 class=empty>No inspections</td></tr>'}</tbody></table></div>`
+}
+function newInspection(){
+let opts=state.assets.map(a=>`<option>${a.code}</option>`).join('');
+modal(`<h2>New Inspection</h2><div class="form"><div class="field"><label>Asset</label><select id="ia">${opts}</select></div><div class="field"><label>Component</label><input id="ic" value="Bearing"></div><div class="field"><label>Parameter</label><input id="ip" value="Horizontal Vibration"></div><div class="field"><label>Actual Value</label><input id="iv" type="number" step="0.1"></div><div class="field"><label>Unit</label><input id="iu" value="mm/s"></div><div class="field"><label>Max Limit</label><input id="imax" type="number" step="0.1" value="4.5"></div><div class="field full"><label>Comment</label><textarea id="icom"></textarea></div></div><div class="modalfoot"><button class="btn primary" onclick="saveInspection()">Save Inspection</button><button class="btn" onclick="closeModal()">Cancel</button></div>`)
+}
+function saveInspection(){
+let actual=Number(iv.value), max=Number(imax.value), status=actual>max*1.5?'CRITICAL':actual>max?'HIGH':'NORMAL', wo='';
+if(status!=='NORMAL'){wo='WO-'+String(Date.now()).slice(-6);state.workorders.unshift({id:wo,asset:ia.value,problem:`${ip.value} above limit (${actual} ${iu.value})`,priority:status,status:'NEW',assigned:'planner',date:new Date().toISOString().slice(0,10)})}
+state.inspections.unshift({date:new Date().toLocaleString(),asset:ia.value,component:ic.value,parameter:ip.value,actual,unit:iu.value,status,wo,comment:icom.value});save();closeModal();toast(status==='NORMAL'?'Inspection saved':'Abnormal inspection → Work Order created');inspection()
+}
+function workorders(){
+let rows=state.workorders.map(x=>`<tr><td>${x.id}</td><td>${x.asset}</td><td>${x.problem}</td><td class="${x.priority==='CRITICAL'?'danger':x.priority==='HIGH'?'warn':''}">${x.priority}</td><td>${x.status}</td><td>${x.assigned||'-'}</td><td><button class="btn" onclick="advanceWO('${x.id}')">Advance</button></td></tr>`).join('');
+document.getElementById('content').innerHTML=`<div class="actions"><button class="btn primary" onclick="newWO()">+ New Work Order</button></div><div class="section tablewrap"><table class="table"><thead><tr><th>WO</th><th>Asset</th><th>Problem</th><th>Priority</th><th>Status</th><th>Assigned</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`
+}
+function newWO(){let opts=state.assets.map(a=>`<option>${a.code}</option>`).join('');modal(`<h2>New Work Order</h2><div class="form"><div class="field"><label>Asset</label><select id="wa">${opts}</select></div><div class="field"><label>Priority</label><select id="wp"><option>LOW</option><option>MEDIUM</option><option>HIGH</option><option>CRITICAL</option></select></div><div class="field full"><label>Problem</label><textarea id="wprob"></textarea></div><div class="field"><label>Assigned</label><select id="wass"><option>planner</option><option>supervisor</option><option>technician</option></select></div></div><div class="modalfoot"><button class="btn primary" onclick="saveWO()">Save</button><button class="btn" onclick="closeModal()">Cancel</button></div>`)}
+function saveWO(){state.workorders.unshift({id:'WO-'+String(Date.now()).slice(-6),asset:wa.value,problem:wprob.value,priority:wp.value,status:'NEW',assigned:wass.value,date:new Date().toISOString().slice(0,10)});save();closeModal();workorders();toast('Work Order created')}
+function advanceWO(id){let x=state.workorders.find(x=>x.id===id), flow=['NEW','APPROVED','PLANNED','ASSIGNED','IN PROGRESS','WAITING','COMPLETED','VERIFIED','CLOSED'];let i=flow.indexOf(x.status);x.status=flow[Math.min(i+1,flow.length-1)];save();workorders();toast(`${id}: ${x.status}`)}
+function pm(){
+let rows=state.pm.map(x=>`<tr><td>${x.id}</td><td>${x.asset}</td><td>${x.task}</td><td>${x.freq}</td><td>${x.due}</td><td>${x.status}</td></tr>`).join('');
+document.getElementById('content').innerHTML=`<div class="actions"><button class="btn primary" onclick="newPM()">+ Add PM</button></div><div class="section tablewrap"><table class="table"><thead><tr><th>ID</th><th>Asset</th><th>Task</th><th>Frequency</th><th>Due</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`
+}
+function newPM(){let opts=state.assets.map(a=>`<option>${a.code}</option>`).join('');modal(`<h2>New PM</h2><div class="form"><div class="field"><label>Asset</label><select id="pa">${opts}</select></div><div class="field"><label>Frequency</label><select id="pf"><option>Daily</option><option>Weekly</option><option>Monthly</option><option>Quarterly</option><option>Annual</option><option>Running Hours</option><option>Condition Based</option></select></div><div class="field full"><label>Task</label><input id="pt"></div><div class="field"><label>Due Date</label><input id="pd" type="date"></div></div><div class="modalfoot"><button class="btn primary" onclick="savePM()">Save</button><button class="btn" onclick="closeModal()">Cancel</button></div>`)}
+function savePM(){state.pm.push({id:'PM-'+String(Date.now()).slice(-5),asset:pa.value,task:pt.value,freq:pf.value,due:pd.value,status:'Planned'});save();closeModal();pm();toast('PM saved')}
+function spares(){
+let rows=state.spares.map(x=>`<tr><td>${x.part}</td><td>${x.desc}</td><td>${x.stock}</td><td>${x.min}</td><td>${x.max}</td><td>${x.location}</td><td class="${x.stock<=x.min?'danger':'ok'}">${x.stock<=x.min?'LOW':'OK'}</td></tr>`).join('');
+document.getElementById('content').innerHTML=`<div class="actions"><button class="btn primary" onclick="newSpare()">+ Add Part</button></div><div class="section tablewrap"><table class="table"><thead><tr><th>Part No</th><th>Description</th><th>Stock</th><th>Min</th><th>Max</th><th>Location</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`
+}
+function newSpare(){modal(`<h2>New Spare Part</h2><div class="form"><div class="field"><label>Part No</label><input id="sp"></div><div class="field"><label>Description</label><input id="sd"></div><div class="field"><label>Stock</label><input id="ss" type="number"></div><div class="field"><label>Minimum</label><input id="smin" type="number"></div><div class="field"><label>Maximum</label><input id="smax" type="number"></div><div class="field"><label>Location</label><input id="sl"></div><div class="field"><label>Unit Cost</label><input id="sc" type="number" step="0.01"></div></div><div class="modalfoot"><button class="btn primary" onclick="saveSpare()">Save</button><button class="btn" onclick="closeModal()">Cancel</button></div>`)}
+function saveSpare(){state.spares.push({part:sp.value,desc:sd.value,stock:Number(ss.value),min:Number(smin.value),max:Number(smax.value),location:sl.value,cost:Number(sc.value||0)});save();closeModal();spares();toast('Spare part saved')}
+function breakdown(){document.getElementById('content').innerHTML=`<div class="actions"><button class="btn primary" onclick="newBreakdown()">+ Record Breakdown</button></div><div class="section tablewrap"><table class="table"><thead><tr><th>Date</th><th>Asset</th><th>Failure Mode</th><th>Downtime h</th><th>Lost Production</th></tr></thead><tbody>${state.breakdown.map(x=>`<tr><td>${x.date}</td><td>${x.asset}</td><td>${x.mode}</td><td>${x.down}</td><td>${x.loss}</td></tr>`).join('')||'<tr><td colspan=5 class=empty>No breakdowns</td></tr>'}</tbody></table></div>`}
+function newBreakdown(){let opts=state.assets.map(a=>`<option>${a.code}</option>`).join('');modal(`<h2>Breakdown</h2><div class="form"><div class="field"><label>Asset</label><select id="ba">${opts}</select></div><div class="field"><label>Failure Mode</label><input id="bm"></div><div class="field"><label>Downtime Hours</label><input id="bd" type="number" step="0.1"></div><div class="field"><label>Lost Production</label><input id="bl"></div><div class="field full"><label>Finding</label><textarea id="bf"></textarea></div></div><div class="modalfoot"><button class="btn primary" onclick="saveBreakdown()">Save</button><button class="btn" onclick="closeModal()">Cancel</button></div>`)}
+function saveBreakdown(){state.breakdown.push({date:new Date().toLocaleDateString(),asset:ba.value,mode:bm.value,down:Number(bd.value),loss:bl.value,finding:bf.value});save();closeModal();breakdown();toast('Breakdown recorded')}
+function shutdown(){document.getElementById('content').innerHTML=`<div class="actions"><button class="btn primary" onclick="newShutdown()">+ New Shutdown</button></div><div class="section tablewrap"><table class="table"><thead><tr><th>ID</th><th>Area</th><th>Start</th><th>Finish</th><th>Progress</th><th>Critical Path</th></tr></thead><tbody>${state.shutdown.map(x=>`<tr><td>${x.id}</td><td>${x.area}</td><td>${x.start}</td><td>${x.finish}</td><td>${x.progress}%<div class=progress><i style="width:${x.progress}%"></i></div></td><td>${x.critical}</td></tr>`).join('')||'<tr><td colspan=6 class=empty>No shutdown projects</td></tr>'}</tbody></table></div>`}
+function newShutdown(){modal(`<h2>Shutdown Project</h2><div class="form"><div class="field"><label>Area</label><input id="sha"></div><div class="field"><label>Progress %</label><input id="shp" type="number" value="0"></div><div class="field"><label>Start</label><input id="shs" type="date"></div><div class="field"><label>Finish</label><input id="she" type="date"></div><div class="field full"><label>Critical Path / Scope</label><textarea id="shc"></textarea></div></div><div class="modalfoot"><button class="btn primary" onclick="saveShutdown()">Save</button><button class="btn" onclick="closeModal()">Cancel</button></div>`)}
+function saveShutdown(){state.shutdown.push({id:'SD-'+String(Date.now()).slice(-5),area:sha.value,progress:Number(shp.value),start:shs.value,finish:she.value,critical:shc.value});save();closeModal();shutdown();toast('Shutdown saved')}
+function rca(){document.getElementById('content').innerHTML=`<div class="actions"><button class="btn primary" onclick="newRCA()">+ New RCA</button></div><div class="section tablewrap"><table class="table"><thead><tr><th>ID</th><th>Asset</th><th>Failure</th><th>Root Cause</th><th>Corrective Action</th><th>Due</th></tr></thead><tbody>${state.rca.map(x=>`<tr><td>${x.id}</td><td>${x.asset}</td><td>${x.failure}</td><td>${x.root}</td><td>${x.action}</td><td>${x.due}</td></tr>`).join('')||'<tr><td colspan=6 class=empty>No RCA cases</td></tr>'}</tbody></table></div>`}
+function newRCA(){let opts=state.assets.map(a=>`<option>${a.code}</option>`).join('');modal(`<h2>RCA / 5 Why</h2><div class="form"><div class="field"><label>Asset</label><select id="ra">${opts}</select></div><div class="field"><label>Failure</label><input id="rf"></div><div class="field full"><label>5 Why / Root Cause</label><textarea id="rr"></textarea></div><div class="field full"><label>Corrective / Preventive Action</label><textarea id="rac"></textarea></div><div class="field"><label>Due Date</label><input id="rd" type="date"></div></div><div class="modalfoot"><button class="btn primary" onclick="saveRCA()">Save</button><button class="btn" onclick="closeModal()">Cancel</button></div>`)}
+function saveRCA(){state.rca.push({id:'RCA-'+String(Date.now()).slice(-5),asset:ra.value,failure:rf.value,root:rr.value,action:rac.value,due:rd.value});save();closeModal();rca();toast('RCA saved')}
+function reports(){document.getElementById('content').innerHTML=`<div class="grid"><div class="card"><b>Daily Report</b><p class="muted">Assets: ${state.assets.length} • WO: ${state.workorders.length} • Inspections: ${state.inspections.length}</p><button class="btn" onclick="exportCSV()">Export data</button></div><div class="card"><b>Maintenance Report</b><p class="muted">PM: ${state.pm.length} • Breakdown: ${state.breakdown.length} • RCA: ${state.rca.length}</p></div><div class="card"><b>Spare Parts Report</b><p class="muted">Low stock: ${state.spares.filter(x=>x.stock<=x.min).length}</p></div><div class="card"><b>Management Summary</b><p class="muted">Generated from actual registered records. Missing values are not invented.</p></div></div><div class="section card"><h2>Report Rule</h2><p class="muted">Daily / Weekly / Monthly / Quarterly / Annual reports can be exported from the registered data. “Data Not Available” should be used where records are missing.</p></div>`}
+function settings(){document.getElementById('content').innerHTML=`<div class="grid"><div class="card"><h2>Current User</h2><p>${state.user?.name||'-'} — ${roles[state.user?.role]||'-'}</p></div><div class="card"><h2>Language</h2><select onchange="state.lang=this.value;save();toast('Language preference saved')"><option value="ku">کوردی</option><option value="ar">العربية</option><option value="en">English</option></select></div><div class="card"><h2>Backend</h2><p class="muted">Local mode is active. Supabase connection fields can be added here in the cloud deployment version.</p></div><div class="card"><h2>Data</h2><button class="btn danger" onclick="resetData()">Reset local demo data</button></div></div><div class="section card"><h2>Production architecture</h2><p class="muted">Frontend: PWA • Backend: Supabase/PostgreSQL • Auth: Supabase Auth • Files: Storage • Sync: online/offline queue • Hosting: Vercel/GitHub.</p></div>`}
+function resetData(){if(confirm('Reset all local demo data?')){localStorage.removeItem(KEY);location.reload()}}
+function exportCSV(){let rows=[['Type','ID','Asset','Status','Priority','Date']];state.workorders.forEach(x=>rows.push(['WorkOrder',x.id,x.asset,x.status,x.priority,x.date]));state.inspections.forEach(x=>rows.push(['Inspection','',x.asset,x.status,'',x.date]));let csv=rows.map(r=>r.map(v=>`"${String(v??'').replaceAll('"','""')}"`).join(',')).join('\\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='plantcare-report.csv';a.click()}
+if(state.user){document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');go('dashboard')}
+</script>
+</body></html>
