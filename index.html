@@ -51,6 +51,20 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.app{display:fle
 <div id="modal" class="modal"><div class="dialog"><div id="modalBody"></div></div></div>
 <div id="toast" class="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://htnhkmxdoeqyljkxiyvn.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_HgS1LoqrKqN_qFCTocGuhg_joHFd_hK';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+async function testSupabaseConnection(){
+  try {
+    const { error } = await supabaseClient.from('assets').select('id').limit(1);
+    if (error) console.warn('Supabase connection:', error.message);
+    else console.log('Supabase connected');
+  } catch(e) { console.warn('Supabase connection:', e); }
+}
+testSupabaseConnection();
+</script>
 <script>
 const KEY='plantcare_cmms_v2';
 const roles={manager:'Manager',planner:'Planner',supervisor:'Supervisor',technician:'Technician',operator:'Operator',storekeeper:'Storekeeper'};
