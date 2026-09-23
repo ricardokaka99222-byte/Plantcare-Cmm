@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="ku" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PlantCare CMMS</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f6f8;color:#172033}
+.app{min-height:100vh;display:flex}.side{width:230px;background:#172033;color:#fff;padding:18px;position:fixed;right:0;top:0;bottom:0}.brand{font-weight:700;font-size:21px;margin-bottom:25px}.nav button{display:block;width:100%;border:0;background:transparent;color:#dce4ef;text-align:right;padding:12px;border-radius:8px;margin:4px 0;cursor:pointer}.nav button:hover,.nav button.active{background:#2563eb;color:#fff}.main{margin-right:230px;width:calc(100% - 230px);padding:24px}.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:20px}.title{font-size:27px;font-weight:700}.btn{border:0;border-radius:8px;padding:10px 14px;background:#2563eb;color:#fff;cursor:pointer}.btn.gray{background:#64748b}.btn.red{background:#dc2626}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card,.panel{background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 10px #0001}.card b{font-size:28px;display:block;margin-top:8px}.panel{margin-top:18px}.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.search{padding:10px;border:1px solid #cbd5e1;border-radius:8px;width:230px}.tablewrap{overflow:auto}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:right;white-space:nowrap}.badge{padding:4px 8px;border-radius:15px;background:#e5e7eb;font-size:12px}.empty{text-align:center;padding:30px;color:#64748b}.modal{display:none;position:fixed;inset:0;background:#0008;align-items:center;justify-content:center;padding:15px}.modal.show{display:flex}.box{background:#fff;border-radius:12px;padding:20px;width:min(700px,100%);max-height:90vh;overflow:auto}.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:5px}.full{grid-column:1/-1}.field input,.field select,.field textarea{padding:9px;border:1px solid #cbd5e1;border-radius:7px;font:inherit}.field textarea{min-height:80px}.modalactions{margin-top:15px;display:flex;gap:8px}.status{display:none;padding:10px;border-radius:8px;margin-bottom:12px;background:#eff6ff;color:#1d4ed8}.status.show{display:block}.hidden{display:none!important}
+body.dark{background:#111827;color:#e5e7eb}body.dark .card,body.dark .panel,body.dark .box{background:#1f2937}body.dark .table th,body.dark .table td{border-color:#374151}body.dark .field input,body.dark .field select,body.dark .field textarea{color:#fff;background:#111827;border-color:#4b5563}
+@media(max-width:800px){.side{width:180px}.main{margin-right:180px;width:calc(100% - 180px)}.cards{grid-template-columns:1fr 1fr}.form{grid-template-columns:1fr}.full{grid-column:auto}}
+@media(max-width:600px){.side{position:static;width:100%;height:auto}.app{display:block}.main{margin:0;width:100%;padding:14px}.cards{grid-template-columns:1fr}.top{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side">
+<div class="brand">🏭 PlantCare CMMS</div>
+<div class="nav">
+<button class="active" data-page="dashboard">📊 داشبۆرد</button>
+<button data-page="assets">🏭 Assets</button>
+<button data-page="workorders">🛠️ Work Orders</button>
+<button data-page="settings">⚙️ Settings</button>
+</div>
+</aside>
+<main class="main">
+<div class="top"><div class="title" id="title">داشبۆرد</div><div><button class="btn gray" id="theme">🌙</button></div></div>
+<div id="status" class="status"></div>
+
+<section id="dashboard">
+<div class="cards">
+<div class="card">کۆی Assets<b id="assetCount">0</b></div>
+<div class="card">کۆی Work Orders<b id="woCount">0</b></div>
+<div class="card">Open Work Orders<b id="openCount">0</b></div>
+<div class="card">Critical Assets<b id="criticalCount">0</b></div>
+</div>
+<div class="panel"><h3>دوایین Assets</h3><div id="recentAssets"></div></div>
+<div class="panel"><h3>دوایین Work Orders</h3><div id="recentWO"></div></div>
+</section>
+
+<section id="assets" class="hidden">
+<div class="panel">
+<div class="row"><h3>Assets</h3><div><input class="search" id="assetSearch" placeholder="گەڕان..."><button class="btn" id="addAsset">+ زیادکردن</button></div></div>
+<div class="tablewrap"><table class="table"><thead><tr><th>Code</th><th>Name</th><th>Category</th><th>Location</th><th>Status</th><th>Criticality</th><th></th></tr></thead><tbody id="assetRows"></tbody></table></div>
+</div>
+</section>
+
+<section id="workorders" class="hidden">
+<div class="panel">
+<div class="row"><h3>Work Orders</h3><div><input class="search" id="woSearch" placeholder="گەڕان..."><button class="btn" id="addWO">+ زیادکردن</button></div></div>
+<div class="tablewrap"><table class="table"><thead><tr><th>WO</th><th>Title</th><th>Asset</th><th>Priority</th><th>Status</th><th>Planned</th><th></th></tr></thead><tbody id="woRows"></tbody></table></div>
+</div>
+</section>
+
+<section id="settings" class="hidden"><div class="panel"><h3>Settings</h3><p>ئەم وەشانە Assets و Work Orders ـەکانی Supabase بەکاردەهێنێت.</p></div></section>
+</main></div>
+
+<div class="modal" id="modal"><div class="box"><h3 id="modalTitle"></h3><form id="form"></form></div></div>
+
+<script>
+const SUPABASE_URL="https://htnhkmxdoeqyljkxiyvn.supabase.co";
+const SUPABASE_KEY="sb_publishable_HgS1LoqrKqN_qFCTocGuhg_joHFd_hK";
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let assets=[],workOrders=[],editId=null,editType=null;
+
+const $=id=>document.getElementById(id);
+const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function msg(t,error=false){$("status").textContent=t;$("status").style.background=error?"#fee2e2":"#eff6ff";$("status").style.color=error?"#b91c1c":"#1d4ed8";$("status").classList.add("show");setTimeout(()=>$("status").classList.remove("show"),3500)}
+function badge(x){return '<span class="badge">'+esc(x||"-")+'</span>'}
+
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>page(b.dataset.page));
+function page(p){
+ document.querySelectorAll("main section").forEach(s=>s.classList.add("hidden"));
+ $(p).classList.remove("hidden");
+ document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===p));
+ $("title").textContent={dashboard:"داشبۆرد",assets:"Assets",workorders:"Work Orders",settings:"Settings"}[p];
+ if(p==="dashboard")dashboard();
+}
+$("theme").onclick=()=>{document.body.classList.toggle("dark");localStorage.setItem("pc_theme",document.body.classList.contains("dark")?"1":"0")};
+if(localStorage.getItem("pc_theme")==="1")document.body.classList.add("dark");
+
+async function loadAssets(){
+ const r=await db.from("assets").select("*").order("created_at",{ascending:false});
+ if(r.error){msg("Assets: "+r.error.message,true);return} assets=r.data||[];renderAssets();dashboard();
+}
+async function loadWO(){
+ const r=await db.from("work_orders").select("*, assets:asset_id(id,asset_code,name)").order("created_at",{ascending:false});
+ if(r.error){msg("Work Orders: "+r.error.message,true);return} workOrders=r.data||[];renderWO();dashboard();
+}
+function renderAssets(q=""){
+ const a=assets.filter(x=>Object.values(x).join(" ").toLowerCase().includes(q.toLowerCase()));
+ $("assetRows").innerHTML=a.length?a.map(x=>`<tr><td>${esc(x.asset_code)}</td><td>${esc(x.name)}</td><td>${esc(x.category)}</td><td>${esc(x.location)}</td><td>${badge(x.status)}</td><td>${badge(x.criticality)}</td><td><button class="btn gray" onclick="openAsset('${x.id}')">✏️</button> <button class="btn red" onclick="removeAsset('${x.id}')">🗑️</button></td></tr>`).join(""):'<tr><td colspan="7" class="empty">هیچ داتایەک نییە</td></tr>';
+}
+function renderWO(q=""){
+ const a=workOrders.filter(x=>Object.values(x).join(" ").toLowerCase().includes(q.toLowerCase()));
+ $("woRows").innerHTML=a.length?a.map(x=>`<tr><td>${esc(x.wo_number)}</td><td>${esc(x.title)}</td><td>${esc(x.assets?.name)}</td><td>${badge(x.priority)}</td><td>${badge(x.status)}</td><td>${esc(x.planned_date)}</td><td><button class="btn gray" onclick="openWO('${x.id}')">✏️</button> <button class="btn red" onclick="removeWO('${x.id}')">🗑️</button></td></tr>`).join(""):'<tr><td colspan="7" class="empty">هیچ داتایەک نییە</td></tr>';
+}
+function dashboard(){
+ $("assetCount").textContent=assets.length;$("woCount").textContent=workOrders.length;
+ $("openCount").textContent=workOrders.filter(x=>["Open","In Progress","Pending"].includes(x.status)).length;
+ $("criticalCount").textContent=assets.filter(x=>String(x.criticality).toLowerCase()==="critical").length;
+ $("recentAssets").innerHTML=assets.slice(0,5).map(x=>`<p>🏭 <b>${esc(x.name)}</b> — ${esc(x.asset_code)}</p>`).join("")||'<div class="empty">داتا نییە</div>';
+ $("recentWO").innerHTML=workOrders.slice(0,5).map(x=>`<p>🛠️ <b>${esc(x.wo_number)}</b> — ${esc(x.title)}</p>`).join("")||'<div class="empty">داتا نییە</div>';
+}
+
+function openAsset(id=null){
+ editType="asset";editId=id;const a=assets.find(x=>x.id===id)||{};
+ $("modalTitle").textContent=id?"Edit Asset":"Add Asset";
+ $("form").innerHTML=`<div class="form">
+<label class="field">Asset Code *<input name="asset_code" required value="${esc(a.asset_code)}"></label>
+<label class="field">Name *<input name="name" required value="${esc(a.name)}"></label>
+<label class="field">Category<input name="category" value="${esc(a.category)}"></label>
+<label class="field">Location<input name="location" value="${esc(a.location)}"></label>
+<label class="field">Manufacturer<input name="manufacturer" value="${esc(a.manufacturer)}"></label>
+<label class="field">Model<input name="model" value="${esc(a.model)}"></label>
+<label class="field">Serial Number<input name="serial_number" value="${esc(a.serial_number)}"></label>
+<label class="field">Status<select name="status"><option ${a.status==="Active"?"selected":""}>Active</option><option ${a.status==="Inactive"?"selected":""}>Inactive</option><option ${a.status==="Under Maintenance"?"selected":""}>Under Maintenance</option></select></label>
+<label class="field">Criticality<select name="criticality"><option ${a.criticality==="Low"?"selected":""}>Low</option><option ${a.criticality==="Medium"?"selected":""}>Medium</option><option ${a.criticality==="High"?"selected":""}>High</option><option ${a.criticality==="Critical"?"selected":""}>Critical</option></select></label>
+<label class="field">Installation Date<input type="date" name="installation_date" value="${esc(a.installation_date)}"></label>
+<label class="field full">Description<textarea name="description">${esc(a.description)}</textarea></label>
+<label class="field full">Notes<textarea name="notes">${esc(a.notes)}</textarea></label>
+</div><div class="modalactions"><button class="btn">Save</button><button type="button" class="btn gray" onclick="closeModal()">Cancel</button></div>`;
+ $("modal").classList.add("show");
+}
+function openWO(id=null){
+ editType="wo";editId=id;const w=workOrders.find(x=>x.id===id)||{};
+ $("modalTitle").textContent=id?"Edit Work Order":"Add Work Order";
+ $("form").innerHTML=`<div class="form">
+<label class="field">WO Number *<input name="wo_number" required value="${esc(w.wo_number||"WO-"+Date.now())}"></label>
+<label class="field">Title *<input name="title" required value="${esc(w.title)}"></label>
+<label class="field full">Description<textarea name="description">${esc(w.description)}</textarea></label>
+<label class="field">Asset<select name="asset_id"><option value="">-- None --</option>${assets.map(a=>`<option value="${a.id}" ${a.id===w.asset_id?"selected":""}>${esc(a.asset_code)} - ${esc(a.name)}</option>`).join("")}</select></label>
+<label class="field">Priority<select name="priority"><option>Low</option><option>Medium</option><option>High</option><option>Emergency</option></select></label>
+<label class="field">Status<select name="status"><option>Open</option><option>In Progress</option><option>Pending</option><option>Completed</option><option>Cancelled</option></select></label>
+<label class="field">Category<input name="category" value="${esc(w.category)}"></label>
+<label class="field">Location<input name="location" value="${esc(w.location)}"></label>
+<label class="field">Assigned To<input name="assigned_to" value="${esc(w.assigned_to)}"></label>
+<label class="field">Planned Date<input type="date" name="planned_date" value="${esc(w.planned_date)}"></label>
+<label class="field">Estimated Hours<input type="number" step=".1" name="estimated_hours" value="${esc(w.estimated_hours)}"></label>
+<label class="field">Actual Hours<input type="number" step=".1" name="actual_hours" value="${esc(w.actual_hours)}"></label>
+<label class="field full">Corrective Action<textarea name="corrective_action">${esc(w.corrective_action)}</textarea></label>
+<label class="field full">Notes<textarea name="notes">${esc(w.notes)}</textarea></label>
+</div><div class="modalactions"><button class="btn">Save</button><button type="button" class="btn gray" onclick="closeModal()">Cancel</button></div>`;
+ $("modal").classList.add("show");
+}
+function closeModal(){$("modal").classList.remove("show");editId=null;editType=null}
+$("form").onsubmit=async e=>{
+ e.preventDefault();let d=Object.fromEntries(new FormData(e.target).entries());
+ if(editType==="asset"){
+  d.updated_at=new Date().toISOString();
+  let r=editId?await db.from("assets").update(d).eq("id",editId):await db.from("assets").insert(d);
+  if(r.error){msg(r.error.message,true);return}await loadAssets();msg("Asset بە سەرکەوتوویی پاشەکەوت کرا");
+ }else{
+  ["asset_id","description","category","location","assigned_to","planned_date","estimated_hours","actual_hours","corrective_action","notes"].forEach(k=>{if(d[k]==="")d[k]=null});
+  if(d.estimated_hours!==null)d.estimated_hours=Number(d.estimated_hours);
+  if(d.actual_hours!==null)d.actual_hours=Number(d.actual_hours);
+  d.updated_at=new Date().toISOString();
+  let r=editId?await db.from("work_orders").update(d).eq("id",editId):await db.from("work_orders").insert(d);
+  if(r.error){msg(r.error.message,true);return}await loadWO();msg("Work Order بە سەرکەوتوویی پاشەکەوت کرا");
+ }
+ closeModal();
+};
+async function removeAsset(id){if(!confirm("دڵنیایت؟"))return;let r=await db.from("assets").delete().eq("id",id);if(r.error){msg(r.error.message,true);return}await loadAssets();msg("سڕایەوە")}
+async function removeWO(id){if(!confirm("دڵنیایت؟"))return;let r=await db.from("work_orders").delete().eq("id",id);if(r.error){msg(r.error.message,true);return}await loadWO();msg("سڕایەوە")}
+
+$("addAsset").onclick=()=>openAsset();$("addWO").onclick=()=>openWO();
+$("assetSearch").oninput=e=>renderAssets(e.target.value);$("woSearch").oninput=e=>renderWO(e.target.value);
+$("modal").onclick=e=>{if(e.target.id==="modal")closeModal()};
+(async()=>{await loadAssets();await loadWO()})();
+</script>
+</body>
+</html>
